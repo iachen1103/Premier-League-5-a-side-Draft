@@ -1,0 +1,2733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Premier League 5-a-side Roulette</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background: #f4f6fb;
+    color: #182033;
+    min-height: 100vh;
+}
+
+button {
+    font-family: inherit;
+}
+
+.screen {
+    display: none;
+    min-height: 100vh;
+}
+
+.screen.active {
+    display: flex;
+}
+
+/* =========================
+   START
+========================= */
+
+#startScreen {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(135deg, #101a35, #263b72);
+    color: white;
+}
+
+.start-box {
+    max-width: 650px;
+    padding: 40px;
+}
+
+.football-icon {
+    font-size: 72px;
+    margin-bottom: 20px;
+}
+
+.start-box h1 {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.start-box p {
+    font-size: 18px;
+    color: #dce4ff;
+    line-height: 1.6;
+    margin-bottom: 35px;
+}
+
+.primary-btn {
+    border: none;
+    background: #1f6fff;
+    color: white;
+    padding: 16px 38px;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+    background: #145bd1;
+}
+
+/* =========================
+   GAME
+========================= */
+
+#gameScreen {
+    flex-direction: column;
+    padding: 25px;
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.top-bar h2 {
+    font-size: 26px;
+}
+
+.progress {
+    font-weight: bold;
+    color: #59647d;
+}
+
+.game-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1fr;
+    gap: 25px;
+    max-width: 1400px;
+    width: 100%;
+    margin: auto;
+    align-items: stretch;
+}
+
+.panel {
+    background: white;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 8px 25px rgba(30,45,80,.08);
+}
+
+.panel h3 {
+    margin-bottom: 18px;
+    font-size: 18px;
+}
+
+/* TEAM */
+
+.position-card {
+    border: 2px solid #e6eaf2;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+    background: #fafbfe;
+    min-height: 75px;
+}
+
+.position-name {
+    font-size: 12px;
+    font-weight: bold;
+    color: #7a849b;
+    margin-bottom: 6px;
+}
+
+.position-player {
+    font-weight: bold;
+}
+
+.position-card.filled {
+    border-color: #1f6fff;
+    background: #edf4ff;
+}
+
+/* ROULETTE */
+
+.roulette-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.roulette-wrapper {
+    position: relative;
+    width: min(100%, 420px);
+    margin: 10px auto 25px;
+}
+
+.wheel {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 8px;
+    padding: 8px;
+    background: #f4f0ff;
+    border: 8px solid white;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(20,35,70,.18);
+    transition: none;
+}
+
+.club-cell {
+    min-width: 0;
+    aspect-ratio: 1 / 1;
+    border: 2px solid #ddd6fe;
+    border-radius: 12px;
+    background: #c4b5fd;
+    color: #182033;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: .2px;
+    transition: transform .08s ease, background .08s ease, box-shadow .08s ease, opacity .08s ease;
+    user-select: none;
+}
+
+.club-cell:nth-child(even) {
+    background: #ffffff;
+}
+
+.club-cell.active {
+    background: #8b5cf6;
+    color: white;
+    border-color: #7c3aed;
+    transform: scale(1.06);
+    box-shadow: 0 0 0 4px rgba(139,92,246,.18), 0 8px 18px rgba(124,58,237,.22);
+    z-index: 2;
+}
+
+.club-cell.final {
+    background: #7c3aed;
+    color: white;
+    border-color: #6d28d9;
+    transform: scale(1.08);
+    box-shadow: 0 0 0 5px rgba(124,58,237,.2), 0 10px 24px rgba(124,58,237,.3);
+}
+
+@media(max-width:600px) {
+    .roulette-wrapper {
+        width: min(100%, 340px);
+    }
+
+    .wheel {
+        gap: 5px;
+        padding: 5px;
+    }
+
+    .club-cell {
+        border-radius: 8px;
+        font-size: 11px;
+    }
+}
+
+.club-result {
+    font-size: 30px;
+    font-weight: 900;
+    min-height: 42px;
+    margin-bottom: 8px;
+}
+
+.result-text {
+    color: #69748b;
+    min-height: 24px;
+    margin-bottom: 20px;
+}
+
+.spin-btn {
+    border: none;
+    background: #182033;
+    color: white;
+    padding: 14px 35px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.spin-btn:hover:not(:disabled) {
+    background: #2b3858;
+    transform: translateY(-2px);
+}
+
+.spin-btn:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+/* SKIP */
+
+.skip-btn {
+    margin-top: 12px;
+    border: 2px solid #e1e5ed;
+    background: white;
+    color: #59647d;
+    padding: 11px 25px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.skip-btn:hover:not(:disabled) {
+    border-color: #f0a000;
+    color: #d88700;
+    background: #fff9ed;
+}
+
+.skip-btn:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+.skip-status {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #8992a5;
+}
+
+/* PLAYERS */
+
+.player-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.player-card {
+    width: 100%;
+    text-align: left;
+    border: 2px solid #e5e9f1;
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.player-card:hover {
+    border-color: #1f6fff;
+    background: #f4f8ff;
+    transform: translateY(-2px);
+}
+
+.player-name {
+    font-size: 17px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.player-info {
+    color: #7a849b;
+    font-size: 13px;
+}
+
+.ovr {
+    float: right;
+    font-size: 22px;
+    font-weight: 900;
+    color: #1f6fff;
+}
+
+/* POSITION ACCORDION */
+.position-group {
+    border: 1px solid #e5e9f1;
+    border-radius: 12px;
+    background: #fafbfe;
+    overflow: hidden;
+}
+.position-group + .position-group { margin-top: 10px; }
+.position-group summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 13px 15px;
+    font-weight: 800;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #182033;
+}
+.position-group summary::-webkit-details-marker { display:none; }
+.position-group summary::after { content: '＋'; color:#7a849b; font-size:18px; }
+.position-group[open] summary::after { content: '−'; }
+.position-group summary:hover { background:#f1f5fc; }
+.position-group-count { color:#7a849b; font-size:12px; font-weight:700; }
+.position-group .player-card { border:0; border-top:1px solid #e8ecf3; border-radius:0; }
+.position-group .player-card:first-of-type { border-top:1px solid #e8ecf3; }
+.fc-pos { font-weight:800; color:#1f6fff; }
+.game-pos { color:#7a849b; }
+
+/* =========================
+   FINAL
+========================= */
+
+#finalScreen {
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+}
+
+.final-box {
+    background: white;
+    width: 100%;
+    max-width: 1000px;
+    padding: 35px;
+    border-radius: 20px;
+    box-shadow: 0 10px 35px rgba(30,45,80,.1);
+}
+
+.final-box h1 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.final-team {
+    display: grid;
+    grid-template-columns: repeat(5,1fr);
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.final-player {
+    border: 2px solid #e5e9f1;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+}
+
+.final-position {
+    font-size: 11px;
+    color: #7a849b;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.final-name {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.final-club {
+    color: #7a849b;
+    font-size: 12px;
+}
+
+.score-grid {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.score-card {
+    background: #f5f7fb;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+
+.score-label {
+    font-size: 12px;
+    color: #7a849b;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.score-number {
+    font-size: 30px;
+    font-weight: 900;
+}
+
+.reveal-btn {
+    display: block;
+    margin: 0 auto 25px;
+    border: none;
+    background: #1f6fff;
+    color: white;
+    padding: 13px 28px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.stats-section {
+    display: none;
+}
+
+.stats-section.visible {
+    display: block;
+}
+
+.stats-section h3 {
+    margin-bottom: 15px;
+}
+
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 25px;
+}
+
+.stats-table th,
+.stats-table td {
+    padding: 10px;
+    border-bottom: 1px solid #e5e9f1;
+    text-align: center;
+}
+
+.stats-table th {
+    font-size: 12px;
+    color: #7a849b;
+}
+
+.play-again {
+    display: block;
+    margin: 0 auto;
+    border: none;
+    background: #182033;
+    color: white;
+    padding: 13px 30px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+@media(max-width:1000px) {
+    .game-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .final-team {
+        grid-template-columns: repeat(2,1fr);
+    }
+
+    .score-grid {
+        grid-template-columns: repeat(2,1fr);
+    }
+}
+
+@media(max-width:600px) {
+    .start-box h1 {
+        font-size: 34px;
+    }
+
+    .roulette-wrapper {
+        width: 280px;
+        height: 280px;
+    }
+
+    .final-team {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =========================
+     START SCREEN
+========================= -->
+
+<section id="startScreen" class="screen active">
+
+    <div class="start-box">
+
+        <div class="football-icon">⚽</div>
+
+        <h1>
+            Premier League<br>
+            5-a-side Roulette
+        </h1>
+
+        <p>
+            Build your ultimate 5-a-side team from 500 players.<br>
+            Spin the roulette, pick one player,<br>
+            and complete your squad.
+        </p>
+        <p style="font-size:12px;color:#bfc9e8;margin-top:-20px;margin-bottom:25px;">
+            2026/27 squads · FC 27 launch ratings reference
+        </p>
+
+        <button id="startButton" class="primary-btn">
+            START GAME
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     GAME SCREEN
+========================= -->
+
+<section id="gameScreen" class="screen">
+
+    <div class="top-bar">
+
+        <h2>Build Your Team</h2>
+
+        <div id="progress" class="progress">
+            0 / 5 PLAYERS
+        </div>
+
+    </div>
+
+
+    <div class="game-layout">
+
+        <!-- TEAM -->
+
+        <div class="panel">
+
+            <h3>YOUR TEAM</h3>
+
+            <div id="teamPositions">
+
+                <div class="position-card" data-position="GK">
+                    <div class="position-name">GOALKEEPER</div>
+                    <div class="position-player">Empty</div>
+                </div>
+
+                <div class="position-card" data-position="DEF">
+                    <div class="position-name">DEFENDER</div>
+                    <div class="position-player">Empty</div>
+                </div>
+
+                <div class="position-card" data-position="MID">
+                    <div class="position-name">MIDFIELDER</div>
+                    <div class="position-player">Empty</div>
+                </div>
+
+                <div class="position-card" data-position="WING">
+                    <div class="position-name">WINGER</div>
+                    <div class="position-player">Empty</div>
+                </div>
+
+                <div class="position-card" data-position="ST">
+                    <div class="position-name">STRIKER</div>
+                    <div class="position-player">Empty</div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ROULETTE -->
+
+        <div class="panel roulette-panel">
+
+            <h3>PREMIER LEAGUE ROULETTE</h3>
+
+            <div class="roulette-wrapper">
+
+                <div id="wheel" class="wheel" aria-label="Premier League club roulette">
+                </div>
+
+            </div>
+
+            <div id="clubResult"
+                 class="club-result">
+                READY?
+            </div>
+
+            <div id="resultText"
+                 class="result-text">
+                Spin to select a club.
+            </div>
+
+            <button id="spinButton"
+                    class="spin-btn">
+                SPIN
+            </button>
+
+            <button id="skipButton"
+                    class="skip-btn"
+                    disabled>
+                SKIP CLUB
+            </button>
+
+            <div id="skipStatus"
+                 class="skip-status">
+                Skip available: 1
+            </div>
+
+        </div>
+
+
+        <!-- PLAYERS -->
+
+        <div class="panel">
+
+            <h3 id="playerPanelTitle">
+                SELECT A PLAYER
+            </h3>
+
+            <div id="playerList"
+                 class="player-list">
+
+                <div style="color:#59647d;">
+                    Spin the roulette first.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     FINAL SCREEN
+========================= -->
+
+<section id="finalScreen"
+         class="screen">
+
+    <div class="final-box">
+
+        <h1>Your 5-a-side Team</h1>
+
+        <div id="finalTeam"
+             class="final-team">
+        </div>
+
+        <div class="score-grid">
+
+            <div class="score-card">
+                <div class="score-label">OVERALL</div>
+                <div id="overallScore"
+                     class="score-number">
+                    0
+                </div>
+            </div>
+
+            <div class="score-card">
+                <div class="score-label">ATTACK</div>
+                <div id="attackScore"
+                     class="score-number">
+                    0
+                </div>
+            </div>
+
+            <div class="score-card">
+                <div class="score-label">DEFENSE</div>
+                <div id="defenseScore"
+                     class="score-number">
+                    0
+                </div>
+            </div>
+
+            <div class="score-card">
+                <div class="score-label">BALANCE</div>
+                <div id="balanceScore"
+                     class="score-number">
+                    0
+                </div>
+            </div>
+
+        </div>
+
+        <button id="revealButton"
+                class="reveal-btn">
+            REVEAL HIDDEN STATS
+        </button>
+
+        <div id="statsSection"
+             class="stats-section">
+
+            <h3>Hidden Player Stats</h3>
+
+            <table class="stats-table">
+
+                <thead>
+                    <tr>
+                        <th>PLAYER</th>
+                        <th>PAC</th>
+                        <th>SHO</th>
+                        <th>PAS</th>
+                        <th>DRI</th>
+                        <th>DEF</th>
+                        <th>PHY</th>
+                    </tr>
+                </thead>
+
+                <tbody id="statsBody"></tbody>
+
+            </table>
+
+        </div>
+
+        <button id="playAgainButton"
+                class="play-again">
+            PLAY AGAIN
+        </button>
+
+    </div>
+
+</section>
+
+
+<script>
+
+/* =====================================================
+   CLUBS
+===================================================== */
+
+const clubs = [
+
+    { short:"ARS", name:"Arsenal" },
+    { short:"AVL", name:"Aston Villa" },
+    { short:"BOU", name:"Bournemouth" },
+    { short:"BRE", name:"Brentford" },
+    { short:"BHA", name:"Brighton & Hove Albion" },
+    { short:"CHE", name:"Chelsea" },
+    { short:"COV", name:"Coventry City" },
+    { short:"CRY", name:"Crystal Palace" },
+    { short:"EVE", name:"Everton" },
+    { short:"FUL", name:"Fulham" },
+    { short:"HUL", name:"Hull City" },
+    { short:"IPS", name:"Ipswich Town" },
+    { short:"LEE", name:"Leeds United" },
+    { short:"LIV", name:"Liverpool" },
+    { short:"MCI", name:"Manchester City" },
+    { short:"MUN", name:"Manchester United" },
+    { short:"NEW", name:"Newcastle United" },
+    { short:"NFO", name:"Nottingham Forest" },
+    { short:"SUN", name:"Sunderland" },
+    { short:"TOT", name:"Tottenham Hotspur" }
+
+];
+
+
+/* =====================================================
+   PLAYER DATABASE
+
+   20 clubs × 25 players = 500 playable players
+
+   OVR = EA SPORTS FC 27 launch rating when available.
+   A small number of current/eligible squad additions are marked
+   as reference estimates when EA's launch database does not contain
+   a directly matching club entry.
+
+   Hidden attributes are generated from position + OVR
+   so the testing version stays compact.
+
+   This is NOT claiming every hidden number is an
+   official EA database value.
+===================================================== */
+
+const rawPlayers = [
+    ["Kepa Arrizabalaga", "Arsenal", "GK", 82, true],
+    ["Riccardo Calafiori", "Arsenal", "DEF", 77, false],
+    ["Gabriel", "Arsenal", "DEF", 89, true],
+    ["Eberechi Eze", "Arsenal", "DEF", 77, false],
+    ["Bruno Guimaraes", "Arsenal", "DEF", 86, true],
+    ["Viktor Gyokeres", "Arsenal", "ST", 87, true],
+    ["Kai Havertz", "Arsenal", "MID", 77, false],
+    ["Piero Hincapie", "Arsenal", "MID", 77, false],
+    ["Ezri Konsa", "Arsenal", "MID", 77, false],
+    ["Noni Madueke", "Arsenal", "WING", 77, false],
+    ["Mikel Merino", "Arsenal", "WING", 77, false],
+    ["Illan Meslier", "Arsenal", "WING", 77, false],
+    ["Cristhian Mosquera", "Arsenal", "WING", 77, false],
+    ["Martin Odegaard", "Arsenal", "ST", 86, true],
+    ["David Raya", "Arsenal", "ST", 88, true],
+    ["Declan Rice", "Arsenal", "MID", 87, true],
+    ["Bukayo Saka", "Arsenal", "WING", 87, true],
+    ["William Saliba", "Arsenal", "DEF", 88, true],
+    ["Jurrien Timber", "Arsenal", "DEF", 77, false],
+    ["Christos Tzolis", "Arsenal", "WING", 77, false],
+    ["Ben White", "Arsenal", "ST", 77, false],
+    ["Martin Zubimendi", "Arsenal", "MID", 77, false],
+    ["Gabriel Martinelli", "Arsenal", "DEF", 77, false],
+    ["Gabriel Jesus", "Arsenal", "WING", 77, false],
+    ["Ethan Nwaneri", "Arsenal", "ST", 77, false],
+    ["Kevin Ayoyemi-Bakumo Abraham", "Aston Villa", "GK", 74, false],
+    ["Ross Barkley", "Aston Villa", "DEF", 74, false],
+    ["Marco Bizot", "Aston Villa", "DEF", 77, true],
+    ["Lamare Bogarde", "Aston Villa", "DEF", 74, false],
+    ["Emiliano Buendia", "Aston Villa", "DEF", 80, true],
+    ["Matty Cash", "Aston Villa", "MID", 81, true],
+    ["Pau Torres", "Aston Villa", "MID", 81, true],
+    ["Alejandro Garnacho", "Aston Villa", "WING", 83, true],
+    ["Joao Gomes", "Aston Villa", "MID", 74, false],
+    ["Leon Goretzka", "Aston Villa", "WING", 74, false],
+    ["Taylor Harwood-Bellis", "Aston Villa", "WING", 74, false],
+    ["Nicolas Jackson", "Aston Villa", "ST", 82, true],
+    ["Boubacar Kamara", "Aston Villa", "WING", 84, true],
+    ["Ian Maatsen", "Aston Villa", "ST", 79, true],
+    ["John McGinn", "Aston Villa", "MID", 81, true],
+    ["Tyrone Mings", "Aston Villa", "DEF", 79, true],
+    ["Amadou Onana", "Aston Villa", "ST", 81, true],
+    ["Victor Lindelof", "Aston Villa", "MID", 74, false],
+    ["Matteo Ruggeri", "Aston Villa", "DEF", 74, false],
+    ["Zion Suzuki", "Aston Villa", "GK", 78, true],
+    ["Aaron Wan-Bissaka", "Aston Villa", "ST", 78, true],
+    ["James Wright", "Aston Villa", "MID", 74, false],
+    ["Ollie Watkins", "Aston Villa", "DEF", 83, true],
+    ["Johan Manzambi", "Aston Villa", "WING", 80, true],
+    ["Emiliano Martinez", "Aston Villa", "GK", 86, true],
+    ["Max Aarons", "Bournemouth", "GK", 72, false],
+    ["Tyler Adams", "Bournemouth", "DEF", 72, false],
+    ["Amine Adli", "Bournemouth", "DEF", 72, false],
+    ["Julian Araujo", "Bournemouth", "DEF", 72, false],
+    ["David Brooks", "Bournemouth", "DEF", 72, false],
+    ["Ryan Christie", "Bournemouth", "MID", 72, false],
+    ["Lewis Cook", "Bournemouth", "MID", 78, true],
+    ["Evanilson", "Bournemouth", "ST", 80, true],
+    ["Michele Di Gregorio", "Bournemouth", "MID", 72, false],
+    ["Bafode Diakite", "Bournemouth", "DEF", 78, true],
+    ["Fraser Forster", "Bournemouth", "WING", 72, false],
+    ["James Hill", "Bournemouth", "WING", 72, false],
+    ["Daniel Jebbison", "Bournemouth", "WING", 72, false],
+    ["Justin Kluivert", "Bournemouth", "ST", 72, false],
+    ["Joao Palhinha", "Bournemouth", "ST", 72, false],
+    ["Djordje Petrovic", "Bournemouth", "ST", 72, false],
+    ["Alvaro Rodriguez", "Bournemouth", "ST", 72, false],
+    ["Luis Sinisterra", "Bournemouth", "MID", 72, false],
+    ["Alex Scott", "Bournemouth", "DEF", 81, true],
+    ["Adam Smith", "Bournemouth", "WING", 72, false],
+    ["Marcus Tavernier", "Bournemouth", "WING", 78, true],
+    ["Adrien Truffert", "Bournemouth", "MID", 80, true],
+    ["Ben Winterburn", "Bournemouth", "DEF", 72, false],
+    ["Eli Junior Kroupi", "Bournemouth", "WING", 80, true],
+    ["Antoine Semenyo", "Bournemouth", "ST", 72, false],
+    ["Kristoffer Ajer", "Brentford", "GK", 73, false],
+    ["Jaidon Anthony", "Brentford", "DEF", 73, false],
+    ["Caelan Avenell", "Brentford", "DEF", 73, false],
+    ["Ellery Balcombe", "Brentford", "DEF", 73, false],
+    ["Nathan Collins", "Brentford", "DEF", 73, false],
+    ["Mikkel Damsgaard", "Brentford", "MID", 79, true],
+    ["Josh Dasilva", "Brentford", "MID", 73, false],
+    ["El Hadji Malick Diouf", "Brentford", "MID", 73, false],
+    ["Fabio Carvalho", "Brentford", "MID", 73, false],
+    ["Rico Henry", "Brentford", "WING", 73, false],
+    ["Aaron Hickey", "Brentford", "WING", 73, false],
+    ["Vitaly Janelt", "Brentford", "WING", 73, false],
+    ["Mathias Jensen", "Brentford", "WING", 80, true],
+    ["Michael Kayode", "Brentford", "ST", 81, true],
+    ["Caoimhin Kelleher", "Brentford", "GK", 79, true],
+    ["Ji-Soo Kim", "Brentford", "ST", 73, false],
+    ["Keane Lewis-Potter", "Brentford", "ST", 73, false],
+    ["Igor Thiago", "Brentford", "ST", 77, true],
+    ["Dango Ouattara", "Brentford", "DEF", 73, false],
+    ["Mamadou Sangare", "Brentford", "WING", 81, true],
+    ["Kevin Schade", "Brentford", "WING", 78, true],
+    ["Hakon Valdimarsson", "Brentford", "MID", 73, false],
+    ["Sepp van den Berg", "Brentford", "DEF", 78, true],
+    ["Callum Wilson", "Brentford", "WING", 73, false],
+    ["Yehor Yarmoliuk", "Brentford", "ST", 75, true],
+    ["Yasin Ayari", "Brighton & Hove Albion", "GK", 73, false],
+    ["Oluwafemi Azeez", "Brighton & Hove Albion", "DEF", 73, false],
+    ["James Beadle", "Brighton & Hove Albion", "DEF", 73, false],
+    ["Olivier Boscagli", "Brighton & Hove Albion", "DEF", 73, false],
+    ["Promise David", "Brighton & Hove Albion", "DEF", 73, false],
+    ["Maxim De Cuyper", "Brighton & Hove Albion", "MID", 73, false],
+    ["Lewis Dunk", "Brighton & Hove Albion", "DEF", 79, true],
+    ["Evan Ferguson", "Brighton & Hove Albion", "ST", 76, true],
+    ["Diego Gomez", "Brighton & Hove Albion", "MID", 73, false],
+    ["Pascal Gross", "Brighton & Hove Albion", "WING", 73, false],
+    ["Jaouen Hadjam", "Brighton & Hove Albion", "WING", 73, false],
+    ["Ferdi Kadioglu", "Brighton & Hove Albion", "WING", 73, false],
+    ["Joao Pedro", "Brighton & Hove Albion", "WING", 83, true],
+    ["Thomas McGill", "Brighton & Hove Albion", "ST", 73, false],
+    ["Yankuba Minteh", "Brighton & Hove Albion", "ST", 73, false],
+    ["Kaoru Mitoma", "Brighton & Hove Albion", "WING", 82, true],
+    ["Matt O'Riley", "Brighton & Hove Albion", "ST", 73, false],
+    ["Ibrahim Osman", "Brighton & Hove Albion", "MID", 73, false],
+    ["Georginio Rutter", "Brighton & Hove Albion", "DEF", 73, false],
+    ["Jason Steele", "Brighton & Hove Albion", "WING", 73, false],
+    ["Pascal Struijk", "Brighton & Hove Albion", "ST", 73, false],
+    ["Michael Svoboda", "Brighton & Hove Albion", "MID", 73, false],
+    ["Bart Verbruggen", "Brighton & Hove Albion", "GK", 82, true],
+    ["Mats Wieffer", "Brighton & Hove Albion", "MID", 78, true],
+    ["Luka Vuskovic", "Brighton & Hove Albion", "ST", 73, false],
+    ["Valentin Barco", "Chelsea", "GK", 79, true],
+    ["Jamie Gittens", "Chelsea", "WING", 80, true],
+    ["Moises Caicedo", "Chelsea", "MID", 84, true],
+    ["Pep Chavarria", "Chelsea", "DEF", 79, true],
+    ["Emmanuel Emegha", "Chelsea", "ST", 78, true],
+    ["Wesley Fofana", "Chelsea", "MID", 79, true],
+    ["Malo Gusto", "Chelsea", "MID", 79, true],
+    ["Jordan Henderson", "Chelsea", "MID", 78, true],
+    ["Reece James", "Chelsea", "MID", 84, true],
+    ["Joao Pedro", "Chelsea", "WING", 83, true],
+    ["Maxence Lacroix", "Chelsea", "WING", 82, true],
+    ["Romeo Lavia", "Chelsea", "WING", 78, true],
+    ["Pedro Neto", "Chelsea", "WING", 81, true],
+    ["Damin Emiliano Martinez", "Chelsea", "ST", 75, false],
+    ["Cole Palmer", "Chelsea", "ST", 85, true],
+    ["Morgan Rogers", "Chelsea", "ST", 84, true],
+    ["Levi Colwill", "Chelsea", "DEF", 81, true],
+    ["Teddy Sharman-Lowe", "Chelsea", "MID", 75, false],
+    ["Gabriel Slonina", "Chelsea", "DEF", 68, true],
+    ["Danny Welbeck", "Chelsea", "WING", 75, false],
+    ["Robert Sanchez", "Chelsea", "ST", 80, true],
+    ["Mykhailo Mudryk", "Chelsea", "MID", 75, true],
+    ["Jorrel Hato", "Chelsea", "DEF", 78, true],
+    ["Geovany Quenda", "Chelsea", "WING", 76, true],
+    ["Marco Palestra", "Chelsea", "ST", 78, true],
+    ["Aurele Amenda", "Coventry City", "GK", 74, true],
+    ["Taiwo Awoniyi", "Coventry City", "DEF", 74, true],
+    ["Daniel Bentley", "Coventry City", "DEF", 70, true],
+    ["Jay Dasilva", "Coventry City", "DEF", 73, true],
+    ["Josh Eccles", "Coventry City", "DEF", 71, true],
+    ["Matt Grimes", "Coventry City", "MID", 76, true],
+    ["Gustavo Hamer", "Coventry City", "MID", 78, true],
+    ["Kaine Kesler-Hayden", "Coventry City", "MID", 72, true],
+    ["Joel Latibeaudiere", "Coventry City", "MID", 71, true],
+    ["Ephron Mason-Clark", "Coventry City", "WING", 75, true],
+    ["Frank Onyeka", "Coventry City", "WING", 75, true],
+    ["Victor Torp", "Coventry City", "WING", 73, true],
+    ["Ethan Pinnock", "Coventry City", "WING", 69, false],
+    ["Jack Rudoni", "Coventry City", "ST", 75, true],
+    ["Carl Rushworth", "Coventry City", "GK", 76, true],
+    ["Tatsuhiro Sakamoto", "Coventry City", "ST", 74, true],
+    ["Ellis Simms", "Coventry City", "ST", 75, true],
+    ["Loum Tchaouna", "Coventry City", "WING", 75, true],
+    ["Bobby Thomas", "Coventry City", "DEF", 74, true],
+    ["Solomon Thomas-Asante", "Coventry City", "WING", 69, false],
+    ["Milan van Ewijk", "Coventry City", "DEF", 76, true],
+    ["Ben Wilson", "Coventry City", "MID", 69, false],
+    ["Luke Woolfenden", "Coventry City", "DEF", 72, true],
+    ["Haji Wright", "Coventry City", "WING", 74, true],
+    ["Caleb Yirenkyi", "Coventry City", "ST", 73, true],
+    ["Walter Benitez", "Crystal Palace", "GK", 74, false],
+    ["Ben Chilwell", "Crystal Palace", "DEF", 74, false],
+    ["Axel Disasi", "Crystal Palace", "DEF", 74, false],
+    ["Cheick Doucoure", "Crystal Palace", "DEF", 74, false],
+    ["Matheus Franca", "Crystal Palace", "DEF", 74, false],
+    ["Evann Guessand", "Crystal Palace", "MID", 74, false],
+    ["Dean Henderson", "Crystal Palace", "GK", 82, true],
+    ["Will Hughes", "Crystal Palace", "MID", 74, false],
+    ["Daichi Kamada", "Crystal Palace", "MID", 74, false],
+    ["Anan Khalaili", "Crystal Palace", "WING", 74, false],
+    ["Jorgen Strand Larsen", "Crystal Palace", "WING", 74, false],
+    ["Jefferson Lerma", "Crystal Palace", "WING", 74, false],
+    ["Jean-Philippe Mateta", "Crystal Palace", "ST", 82, true],
+    ["Remi Matthews", "Crystal Palace", "ST", 74, false],
+    ["Dwight McNeil", "Crystal Palace", "ST", 74, false],
+    ["Oscar Mingueza", "Crystal Palace", "ST", 74, false],
+    ["Tyrick Mitchell", "Crystal Palace", "ST", 74, false],
+    ["Eddie Nketiah", "Crystal Palace", "MID", 74, false],
+    ["Dario Osorio", "Crystal Palace", "DEF", 74, false],
+    ["Yeremy Pino", "Crystal Palace", "WING", 74, false],
+    ["Christopher Richards", "Crystal Palace", "DEF", 77, true],
+    ["Ismaila Sarr", "Crystal Palace", "WING", 80, true],
+    ["Quinten Timber", "Crystal Palace", "DEF", 74, false],
+    ["Takehiro Tomiyasu", "Crystal Palace", "WING", 74, false],
+    ["Adam Wharton", "Crystal Palace", "MID", 79, true],
+    ["Carlos Alcaraz", "Everton", "GK", 73, false],
+    ["Fraser Barnsley", "Everton", "DEF", 73, false],
+    ["Thierno Barry", "Everton", "ST", 76, true],
+    ["Christian Norgaard", "Everton", "DEF", 73, false],
+    ["Jarrad Branthwaite", "Everton", "DEF", 80, true],
+    ["Kiernan Dewsbury-Hall", "Everton", "MID", 78, true],
+    ["James Garner", "Everton", "MID", 82, true],
+    ["Jack Grealish", "Everton", "WING", 82, true],
+    ["Hayden Hackney", "Everton", "MID", 73, false],
+    ["Brennan Johnson", "Everton", "WING", 73, false],
+    ["Michael Keane", "Everton", "WING", 73, false],
+    ["Thomas King", "Everton", "WING", 73, false],
+    ["Ainsley Maitland-Niles", "Everton", "WING", 73, false],
+    ["Vitalii Mykolenko", "Everton", "ST", 78, true],
+    ["Jake O'Brien", "Everton", "ST", 73, false],
+    ["Jordan Pickford", "Everton", "GK", 84, true],
+    ["Merlin Rohl", "Everton", "ST", 73, false],
+    ["James Tarkowski", "Everton", "MID", 80, true],
+    ["Mark Travers", "Everton", "DEF", 79, true],
+    ["Iliman Ndiaye", "Everton", "WING", 82, true],
+    ["Beto", "Everton", "ST", 73, false],
+    ["Tim Iroegbunam", "Everton", "MID", 73, false],
+    ["Idrissa Gueye", "Everton", "DEF", 73, false],
+    ["James Tarkowski", "Everton", "WING", 80, true],
+    ["Jack Harrison", "Everton", "ST", 73, false],
+    ["David Affengruber", "Fulham", "GK", 73, false],
+    ["Michael Allen", "Fulham", "DEF", 73, false],
+    ["Joachim Andersen", "Fulham", "DEF", 81, true],
+    ["Calvin Bassey", "Fulham", "DEF", 73, false],
+    ["Sander Berge", "Fulham", "MID", 79, true],
+    ["Oscar Bobb", "Fulham", "MID", 73, false],
+    ["Tom Cairney", "Fulham", "MID", 73, false],
+    ["Timothy Castagne", "Fulham", "MID", 73, false],
+    ["Shea Charles", "Fulham", "MID", 73, false],
+    ["Jorge Cuenca", "Fulham", "WING", 73, false],
+    ["Gonzalo Garcia", "Fulham", "WING", 73, false],
+    ["Alex Iwobi", "Fulham", "WING", 78, true],
+    ["Hugo Larsson", "Fulham", "WING", 79, true],
+    ["Benjamin Lecomte", "Fulham", "ST", 73, false],
+    ["Bernd Leno", "Fulham", "GK", 81, true],
+    ["Manuel Moran", "Fulham", "ST", 73, false],
+    ["Rodrigo Muniz", "Fulham", "ST", 78, true],
+    ["Cesar Palacios", "Fulham", "MID", 73, false],
+    ["Harrison Reed", "Fulham", "DEF", 73, false],
+    ["Antonee Robinson", "Fulham", "WING", 80, true],
+    ["Kevin Macedo", "Fulham", "ST", 73, false],
+    ["Ryan Sessegnon", "Fulham", "MID", 73, false],
+    ["Emile Smith Rowe", "Fulham", "DEF", 79, true],
+    ["Kenny Tete", "Fulham", "WING", 77, true],
+    ["Terrell Works", "Fulham", "ST", 73, false],
+    ["Semilogo Ajayi", "Hull City", "GK", 69, false],
+    ["Ilyas Ansah", "Hull City", "DEF", 69, false],
+    ["Mohamed Belloumi", "Hull City", "DEF", 69, false],
+    ["Jack Butland", "Hull City", "GK", 78, true],
+    ["Mohamed-Ali Cho", "Hull City", "DEF", 69, false],
+    ["Lewie Coyle", "Hull City", "MID", 69, false],
+    ["Matt Crooks", "Hull City", "MID", 69, false],
+    ["John Egan", "Hull City", "DEF", 75, true],
+    ["Joe Gelhardt", "Hull City", "MID", 69, false],
+    ["Ryan Giles", "Hull City", "WING", 69, false],
+    ["Lucas Gourna-Douath", "Hull City", "WING", 69, false],
+    ["Charles Hughes", "Hull City", "WING", 69, false],
+    ["Tim Iroegbunam", "Hull City", "WING", 69, false],
+    ["Oliver McBurnie", "Hull City", "ST", 75, true],
+    ["Patrick McNair", "Hull City", "ST", 69, false],
+    ["Nobel Mendy", "Hull City", "ST", 69, false],
+    ["Hidemasa Morita", "Hull City", "MID", 78, true],
+    ["Brooke Norton-Cuffy", "Hull City", "MID", 69, false],
+    ["Abdulkadir Omur", "Hull City", "DEF", 69, false],
+    ["Dillon Phillips", "Hull City", "WING", 69, false],
+    ["Regan Slater", "Hull City", "ST", 69, false],
+    ["Elliot Stroud", "Hull City", "MID", 69, false],
+    ["Sorba Thomas", "Hull City", "WING", 75, true],
+    ["Konstantinos Tzolakis", "Hull City", "WING", 79, true],
+    ["Benjamin Tetteh", "Hull City", "ST", 69, false],
+    ["Chuba Akpom", "Ipswich Town", "ST", 75, true],
+    ["Jack Clarke", "Ipswich Town", "DEF", 70, false],
+    ["Emersonn Correia", "Ipswich Town", "DEF", 70, false],
+    ["Leif Davis", "Ipswich Town", "DEF", 70, false],
+    ["Issa Diop", "Ipswich Town", "DEF", 70, false],
+    ["Julio Enciso", "Ipswich Town", "MID", 78, true],
+    ["Issahaku Fatawu", "Ipswich Town", "MID", 70, false],
+    ["Zian Flemming", "Ipswich Town", "MID", 70, false],
+    ["Darnell Furlong", "Ipswich Town", "MID", 70, false],
+    ["Jacob Greaves", "Ipswich Town", "WING", 70, false],
+    ["Cedric Kipre", "Ipswich Town", "WING", 70, false],
+    ["Sasa Lukic", "Ipswich Town", "WING", 78, true],
+    ["Daizen Maeda", "Ipswich Town", "WING", 78, true],
+    ["Azor Matusiwa", "Ipswich Town", "MID", 76, true],
+    ["Kasey McAteer", "Ipswich Town", "ST", 70, false],
+    ["Anis Mehmeti", "Ipswich Town", "ST", 70, false],
+    ["Florentino", "Ipswich Town", "ST", 77, true],
+    ["Marcelino Nunez", "Ipswich Town", "MID", 70, false],
+    ["Dara O'Shea", "Ipswich Town", "DEF", 75, true],
+    ["Exequiel Palacios", "Ipswich Town", "WING", 70, false],
+    ["Alex Palmer", "Ipswich Town", "ST", 70, false],
+    ["Jaden Philogene", "Ipswich Town", "WING", 77, true],
+    ["Kjell Scherpen", "Ipswich Town", "GK", 75, true],
+    ["Jack Taylor", "Ipswich Town", "WING", 70, false],
+    ["Christian Walton", "Ipswich Town", "ST", 70, false],
+    ["Brenden Aaronson", "Leeds United", "GK", 73, false],
+    ["Ethan Ampadu", "Leeds United", "MID", 77, true],
+    ["Melvin Bard", "Leeds United", "DEF", 73, false],
+    ["Jaka Bijol", "Leeds United", "DEF", 77, true],
+    ["Jayden Bogle", "Leeds United", "DEF", 73, false],
+    ["Alex Cairns", "Leeds United", "MID", 73, false],
+    ["Dominic Calvert-Lewin", "Leeds United", "ST", 77, true],
+    ["Nico Elvedi", "Leeds United", "MID", 73, false],
+    ["Ilia Gruev", "Leeds United", "MID", 73, false],
+    ["Gabriel Gudmundsson", "Leeds United", "WING", 73, false],
+    ["Daniel James", "Leeds United", "WING", 78, true],
+    ["Mateo Joseph", "Leeds United", "WING", 73, false],
+    ["James Justin", "Leeds United", "WING", 73, false],
+    ["Sean Longstaff", "Leeds United", "ST", 73, false],
+    ["Tarik Muharemovic", "Leeds United", "ST", 73, false],
+    ["Lukas Nmecha", "Leeds United", "ST", 73, false],
+    ["Noah Okafor", "Leeds United", "ST", 73, false],
+    ["Joe Rodon", "Leeds United", "MID", 73, false],
+    ["Anton Stach", "Leeds United", "DEF", 80, true],
+    ["Ao Tanaka", "Leeds United", "WING", 73, false],
+    ["James Trafford", "Leeds United", "GK", 79, true],
+    ["Harry Wilson", "Leeds United", "MID", 81, true],
+    ["Michael Zetterer", "Leeds United", "DEF", 73, false],
+    ["Frederic Woodman", "Leeds United", "WING", 73, false],
+    ["Isaac Bridge", "Leeds United", "ST", 73, false],
+    ["Ronald Araujo", "Liverpool", "GK", 78, false],
+    ["Bradley Barcola", "Liverpool", "DEF", 78, false],
+    ["Alisson", "Liverpool", "DEF", 87, true],
+    ["Conor Bradley", "Liverpool", "DEF", 78, false],
+    ["Luke Chambers", "Liverpool", "DEF", 78, false],
+    ["Federico Chiesa", "Liverpool", "WING", 83, true],
+    ["Hugo Ekitike", "Liverpool", "MID", 78, false],
+    ["Wataru Endo", "Liverpool", "MID", 78, false],
+    ["Jeremie Frimpong", "Liverpool", "MID", 78, false],
+    ["Cody Gakpo", "Liverpool", "WING", 78, false],
+    ["Joe Gomez", "Liverpool", "WING", 78, false],
+    ["Ryan Gravenberch", "Liverpool", "WING", 78, false],
+    ["Alexander Isak", "Liverpool", "ST", 88, true],
+    ["Vitezslav Jaros", "Liverpool", "ST", 78, false],
+    ["Milos Kerkez", "Liverpool", "ST", 78, false],
+    ["Isaac Mabaya", "Liverpool", "ST", 78, false],
+    ["Alexis Mac Allister", "Liverpool", "ST", 78, false],
+    ["Giorgi Mamardashvili", "Liverpool", "MID", 78, false],
+    ["James McConnell", "Liverpool", "DEF", 78, false],
+    ["Victor Munoz", "Liverpool", "WING", 78, false],
+    ["Dominik Szoboszlai", "Liverpool", "ST", 86, true],
+    ["Kostas Tsimikas", "Liverpool", "MID", 78, false],
+    ["Virgil van Dijk", "Liverpool", "DEF", 89, true],
+    ["Florian Wirtz", "Liverpool", "MID", 88, true],
+    ["Frederick Woodman", "Liverpool", "ST", 78, false],
+    ["Rayan Ait-Nouri", "Manchester City", "GK", 79, false],
+    ["Elliot Anderson", "Manchester City", "DEF", 79, false],
+    ["Allan Andrade", "Manchester City", "DEF", 79, false],
+    ["Marcus Bettinelli", "Manchester City", "DEF", 79, false],
+    ["Rayan Cherki", "Manchester City", "DEF", 86, true],
+    ["Jeremy Doku", "Manchester City", "WING", 86, true],
+    ["Gianluigi Donnarumma", "Manchester City", "GK", 89, true],
+    ["Ruben Dias", "Manchester City", "DEF", 88, true],
+    ["Enzo Fernandez", "Manchester City", "MID", 86, true],
+    ["Phil Foden", "Manchester City", "WING", 79, false],
+    ["Marc Guehi", "Manchester City", "WING", 79, false],
+    ["Josko Gvardiol", "Manchester City", "WING", 79, false],
+    ["Erling Haaland", "Manchester City", "ST", 91, true],
+    ["Abdukodir Khusanov", "Manchester City", "ST", 79, false],
+    ["Mateo Kovacic", "Manchester City", "ST", 79, false],
+    ["Rico Lewis", "Manchester City", "ST", 79, false],
+    ["Iliman Ndiaye", "Manchester City", "ST", 82, true],
+    ["Matheus Nunes", "Manchester City", "MID", 79, false],
+    ["Geronimo Rulli", "Manchester City", "DEF", 79, false],
+    ["Antoine Semenyo", "Manchester City", "WING", 79, false],
+    ["Thiago Reis", "Manchester City", "ST", 79, false],
+    ["Oscar Bobb", "Manchester City", "MID", 79, false],
+    ["Savinho", "Manchester City", "DEF", 79, false],
+    ["James McAtee", "Manchester City", "WING", 79, false],
+    ["Jack Grealish", "Manchester City", "WING", 82, true],
+    ["Bruno Fernandes", "Manchester United", "MID", 89, true],
+    ["Diogo Dalot", "Manchester United", "DEF", 77, false],
+    ["Karl Darlow", "Manchester United", "DEF", 77, false],
+    ["Matthijs de Ligt", "Manchester United", "DEF", 84, true],
+    ["Amad Diallo", "Manchester United", "DEF", 77, false],
+    ["Patrick Dorgu", "Manchester United", "MID", 77, false],
+    ["Tom Heaton", "Manchester United", "MID", 77, false],
+    ["Senne Lammens", "Manchester United", "GK", 79, true],
+    ["Harry Maguire", "Manchester United", "MID", 77, false],
+    ["Lisandro Martinez", "Manchester United", "WING", 77, false],
+    ["Noussair Mazraoui", "Manchester United", "WING", 77, false],
+    ["Bryan Mbeumo", "Manchester United", "WING", 84, true],
+    ["Dermot Mee", "Manchester United", "WING", 77, false],
+    ["Mason Mount", "Manchester United", "ST", 77, false],
+    ["Andrey Santos", "Manchester United", "ST", 77, false],
+    ["Carlos Baleba", "Manchester United", "ST", 77, false],
+    ["Marcus Rashford", "Manchester United", "ST", 77, false],
+    ["Matheus Cunha", "Manchester United", "MID", 77, false],
+    ["Benjamin Sesko", "Manchester United", "ST", 82, true],
+    ["Luke Shaw", "Manchester United", "WING", 77, false],
+    ["Youri Tielemans", "Manchester United", "ST", 77, false],
+    ["Manuel Ugarte", "Manchester United", "MID", 77, false],
+    ["Joshua Zirkzee", "Manchester United", "DEF", 77, false],
+    ["Leny Yoro", "Manchester United", "WING", 77, false],
+    ["Kobbie Mainoo", "Manchester United", "ST", 77, false],
+    ["Joelinton", "Newcastle United", "GK", 76, false],
+    ["Harvey Barnes", "Newcastle United", "WING", 80, true],
+    ["Sven Botman", "Newcastle United", "DEF", 80, true],
+    ["Dan Burn", "Newcastle United", "DEF", 76, false],
+    ["Amar Dedic", "Newcastle United", "DEF", 76, false],
+    ["Anthony Elanga", "Newcastle United", "MID", 76, false],
+    ["Mark Gillespie", "Newcastle United", "MID", 76, false],
+    ["Nicolas Gonzalez", "Newcastle United", "MID", 76, false],
+    ["Lewis Hall", "Newcastle United", "MID", 83, true],
+    ["Lukas Hornicek", "Newcastle United", "WING", 76, false],
+    ["Tino Livramento", "Newcastle United", "WING", 81, true],
+    ["Jacob Murphy", "Newcastle United", "WING", 76, false],
+    ["William Osula", "Newcastle United", "WING", 76, false],
+    ["Nick Pope", "Newcastle United", "GK", 82, true],
+    ["Jacob Ramsey", "Newcastle United", "ST", 76, false],
+    ["Fabian Schar", "Newcastle United", "ST", 81, true],
+    ["Malick Thiaw", "Newcastle United", "ST", 81, true],
+    ["Joseph Willock", "Newcastle United", "MID", 76, false],
+    ["Yoane Wissa", "Newcastle United", "ST", 80, true],
+    ["Sandro Tonali", "Newcastle United", "MID", 84, true],
+    ["Bruno Guimaraes", "Newcastle United", "ST", 86, true],
+    ["Alexander Isak", "Newcastle United", "ST", 88, true],
+    ["Anthony Gordon", "Newcastle United", "DEF", 76, false],
+    ["Kieran Trippier", "Newcastle United", "WING", 76, false],
+    ["Lewis Miley", "Newcastle United", "ST", 76, false],
+    ["Ola Aina", "Nottingham Forest", "GK", 74, false],
+    ["Steven Benda", "Nottingham Forest", "DEF", 74, false],
+    ["Aaron Bott", "Nottingham Forest", "DEF", 74, false],
+    ["Murillo", "Nottingham Forest", "DEF", 74, false],
+    ["Liam Delap", "Nottingham Forest", "ST", 79, true],
+    ["Ousmane Diomande", "Nottingham Forest", "MID", 74, false],
+    ["Nicolas Dominguez", "Nottingham Forest", "MID", 74, false],
+    ["Morgan Gibbs-White", "Nottingham Forest", "MID", 83, true],
+    ["Callum Hudson-Odoi", "Nottingham Forest", "MID", 74, false],
+    ["Arnaud Kalimuendo", "Nottingham Forest", "WING", 74, false],
+    ["Igor Jesus", "Nottingham Forest", "WING", 74, false],
+    ["John Victor", "Nottingham Forest", "WING", 74, false],
+    ["James McAtee", "Nottingham Forest", "WING", 74, false],
+    ["Nikola Milenkovic", "Nottingham Forest", "DEF", 80, true],
+    ["Daniel Munoz", "Nottingham Forest", "ST", 74, false],
+    ["Dan Ndoye", "Nottingham Forest", "WING", 78, true],
+    ["Luca Netz", "Nottingham Forest", "ST", 74, false],
+    ["Felipe", "Nottingham Forest", "MID", 74, false],
+    ["Ibrahim Sangare", "Nottingham Forest", "DEF", 74, false],
+    ["Nicolo Savona", "Nottingham Forest", "WING", 74, false],
+    ["Xaver Schlager", "Nottingham Forest", "ST", 74, false],
+    ["Matz Sels", "Nottingham Forest", "GK", 80, true],
+    ["Neco Williams", "Nottingham Forest", "DEF", 74, false],
+    ["Chris Wood", "Nottingham Forest", "WING", 74, false],
+    ["Ryan Yates", "Nottingham Forest", "ST", 74, false],
+    ["Omar Alderete", "Sunderland", "GK", 81, true],
+    ["Ajibola Alese", "Sunderland", "DEF", 70, false],
+    ["Abdoullah Ba", "Sunderland", "DEF", 70, false],
+    ["Daniel Ballard", "Sunderland", "DEF", 78, true],
+    ["Brian Brobbey", "Sunderland", "ST", 78, true],
+    ["Alan Browne", "Sunderland", "MID", 72, true],
+    ["Kevin Danso", "Sunderland", "DEF", 78, true],
+    ["Mouhamadou Diarra", "Sunderland", "MID", 70, false],
+    ["Melker Ellborg", "Sunderland", "MID", 70, false],
+    ["Trai Hume", "Sunderland", "WING", 78, true],
+    ["Wilson Isidor", "Sunderland", "WING", 75, true],
+    ["Enzo Le Fee", "Sunderland", "WING", 80, true],
+    ["Reinildo Mandava", "Sunderland", "WING", 70, false],
+    ["Thomas Meunier", "Sunderland", "ST", 78, true],
+    ["Simon Moore", "Sunderland", "ST", 70, false],
+    ["Nordi Mukiele", "Sunderland", "ST", 81, true],
+    ["Romaine Mundle", "Sunderland", "WING", 74, true],
+    ["Luke O'Nien", "Sunderland", "MID", 73, true],
+    ["Nilson Angulo", "Sunderland", "DEF", 73, true],
+    ["Robin Roefs", "Sunderland", "GK", 77, true],
+    ["Noah Sadiki", "Sunderland", "ST", 80, true],
+    ["Granit Xhaka", "Sunderland", "MID", 80, true],
+    ["Simon Adingra", "Sunderland", "DEF", 70, false],
+    ["Chemsdine Talbi", "Sunderland", "WING", 77, true],
+    ["Timur Tutierov", "Sunderland", "ST", 70, false],
+    ["Tosin Adarabioyo", "Tottenham Hotspur", "GK", 74, false],
+    ["Brandon Austin", "Tottenham Hotspur", "DEF", 74, false],
+    ["Rodrigo Bentancur", "Tottenham Hotspur", "DEF", 79, true],
+    ["Ben Davies", "Tottenham Hotspur", "DEF", 74, true],
+    ["Martin Dubravka", "Tottenham Hotspur", "DEF", 77, true],
+    ["Mateus Fernandes", "Tottenham Hotspur", "MID", 74, false],
+    ["Conor Gallagher", "Tottenham Hotspur", "MID", 78, true],
+    ["Antonin Kinsky", "Tottenham Hotspur", "GK", 76, true],
+    ["Jacob Knightbridge", "Tottenham Hotspur", "MID", 74, false],
+    ["Mohammed Kudus", "Tottenham Hotspur", "WING", 82, true],
+    ["Dejan Kulusevski", "Tottenham Hotspur", "WING", 74, false],
+    ["James Maddison", "Tottenham Hotspur", "WING", 82, true],
+    ["Omar Marmoush", "Tottenham Hotspur", "WING", 74, false],
+    ["Savinho", "Tottenham Hotspur", "ST", 74, false],
+    ["Mykhailo Mudryk", "Tottenham Hotspur", "ST", 75, true],
+    ["Wilson Odobert", "Tottenham Hotspur", "ST", 78, true],
+    ["Pedro Porro", "Tottenham Hotspur", "ST", 83, true],
+    ["Andrew Robertson", "Tottenham Hotspur", "MID", 80, true],
+    ["Marcos Senesi", "Tottenham Hotspur", "DEF", 82, true],
+    ["Xavi Simons", "Tottenham Hotspur", "WING", 74, false],
+    ["Dominic Solanke", "Tottenham Hotspur", "ST", 82, true],
+    ["Sandro Tonali", "Tottenham Hotspur", "MID", 84, true],
+    ["Destiny Udogie", "Tottenham Hotspur", "DEF", 79, true],
+    ["Micky van de Ven", "Tottenham Hotspur", "DEF", 84, true],
+    ["Jan-Paul van Hecke", "Tottenham Hotspur", "ST", 74, false]
+];
+
+
+
+/* =====================================================
+   CREATE HIDDEN STATS
+===================================================== */
+
+function mapGamePosition(fcPos) {
+    const p = (fcPos || "").toUpperCase();
+    if (p === "GK") return "GK";
+    if (["CB","LB","RB","LWB","RWB"].includes(p)) return "DEF";
+    if (["CDM","CM","CAM","MCD","MOC","MC","MI"].includes(p)) return "MID";
+    if (["LW","RW","LF","RF","LM","RM"].includes(p)) return "WING";
+    if (["ST","CF","LS","RS"].includes(p)) return "ST";
+    return "MID";
+}
+
+/* FC 27 primary-position corrections verified against EA's official ratings pages. */
+const fcPositionOverrides = {
+    'Kepa Arrizabalaga|Arsenal': 'GK',
+    'Riccardo Calafiori|Arsenal': 'LB',
+    'Gabriel|Arsenal': 'CB',
+    'Eberechi Eze|Arsenal': 'CAM',
+    'Bruno Guimaraes|Arsenal': 'CM',
+    'Viktor Gyokeres|Arsenal': 'ST',
+    'Kai Havertz|Arsenal': 'ST',
+    'Piero Hincapie|Arsenal': 'LB',
+    'Ezri Konsa|Arsenal': 'CB',
+    'Noni Madueke|Arsenal': 'RW',
+    'Mikel Merino|Arsenal': 'CM',
+    'Illan Meslier|Arsenal': 'GK',
+    'Cristhian Mosquera|Arsenal': 'CB',
+    'Martin Odegaard|Arsenal': 'CM',
+    'David Raya|Arsenal': 'GK',
+    'Declan Rice|Arsenal': 'CDM',
+    'Bukayo Saka|Arsenal': 'RW',
+    'William Saliba|Arsenal': 'CB',
+    'Jurrien Timber|Arsenal': 'RB',
+    'Christos Tzolis|Arsenal': 'LW',
+    'Ben White|Arsenal': 'RB',
+    'Martin Zubimendi|Arsenal': 'CDM',
+    'Gabriel Martinelli|Arsenal': 'LW',
+    'Gabriel Jesus|Arsenal': 'ST',
+    'Ethan Nwaneri|Arsenal': 'RW',
+    'Kevin Ayoyemi-Bakumo Abraham|Aston Villa': 'ST',
+    'Ross Barkley|Aston Villa': 'CM',
+    'Marco Bizot|Aston Villa': 'GK',
+    'Lamare Bogarde|Aston Villa': 'CDM',
+    'Emiliano Buendia|Aston Villa': 'LM',
+    'Matty Cash|Aston Villa': 'RB',
+    'Pau Torres|Aston Villa': 'CB',
+    'Alejandro Garnacho|Aston Villa': 'LM',
+    'Joao Gomes|Aston Villa': 'CDM',
+    'Leon Goretzka|Aston Villa': 'CM',
+    'Taylor Harwood-Bellis|Aston Villa': 'CB',
+    'Nicolas Jackson|Aston Villa': 'ST',
+    'Boubacar Kamara|Aston Villa': 'CDM',
+    'Ian Maatsen|Aston Villa': 'LB',
+    'John McGinn|Aston Villa': 'RM',
+    'Tyrone Mings|Aston Villa': 'CB',
+    'Amadou Onana|Aston Villa': 'CDM',
+    'Victor Lindelof|Aston Villa': 'CB',
+    'Matteo Ruggeri|Aston Villa': 'LB',
+    'Zion Suzuki|Aston Villa': 'GK',
+    'Aaron Wan-Bissaka|Aston Villa': 'RB',
+    'James Wright|Aston Villa': 'CB',
+    'Ollie Watkins|Aston Villa': 'ST',
+    'Johan Manzambi|Aston Villa': 'CM',
+    'Emiliano Martinez|Aston Villa': 'GK',
+    'Max Aarons|Bournemouth': 'RB',
+    'Tyler Adams|Bournemouth': 'CDM',
+    'Amine Adli|Bournemouth': 'LM',
+    'Julian Araujo|Bournemouth': 'RB',
+    'David Brooks|Bournemouth': 'RM',
+    'Ryan Christie|Bournemouth': 'CM',
+    'Lewis Cook|Bournemouth': 'CDM',
+    'Evanilson|Bournemouth': 'ST',
+    'Michele Di Gregorio|Bournemouth': 'GK',
+    'Bafode Diakite|Bournemouth': 'CB',
+    'Fraser Forster|Bournemouth': 'GK',
+    'James Hill|Bournemouth': 'CB',
+    'Daniel Jebbison|Bournemouth': 'ST',
+    'Justin Kluivert|Bournemouth': 'CAM',
+    'Joao Palhinha|Bournemouth': 'CDM',
+    'Djordje Petrovic|Bournemouth': 'GK',
+    'Alvaro Rodriguez|Bournemouth': 'ST',
+    'Luis Sinisterra|Bournemouth': 'LW',
+    'Alex Scott|Bournemouth': 'CM',
+    'Adam Smith|Bournemouth': 'RB',
+    'Marcus Tavernier|Bournemouth': 'LM',
+    'Adrien Truffert|Bournemouth': 'LB',
+    'Ben Winterburn|Bournemouth': 'LB',
+    'Eli Junior Kroupi|Bournemouth': 'ST',
+    'Antoine Semenyo|Bournemouth': 'RW',
+    'Kristoffer Ajer|Brentford': 'RB',
+    'Jaidon Anthony|Brentford': 'LW',
+    'Caelan Avenell|Brentford': 'GK',
+    'Ellery Balcombe|Brentford': 'GK',
+    'Nathan Collins|Brentford': 'CB',
+    'Mikkel Damsgaard|Brentford': 'CAM',
+    'Josh Dasilva|Brentford': 'CM',
+    'El Hadji Malick Diouf|Brentford': 'LB',
+    'Fabio Carvalho|Brentford': 'CAM',
+    'Rico Henry|Brentford': 'LB',
+    'Aaron Hickey|Brentford': 'RB',
+    'Vitaly Janelt|Brentford': 'CDM',
+    'Mathias Jensen|Brentford': 'CM',
+    'Michael Kayode|Brentford': 'RB',
+    'Caoimhin Kelleher|Brentford': 'GK',
+    'Ji-Soo Kim|Brentford': 'CB',
+    'Keane Lewis-Potter|Brentford': 'LM',
+    'Igor Thiago|Brentford': 'ST',
+    'Dango Ouattara|Brentford': 'RM',
+    'Mamadou Sangare|Brentford': 'CM',
+    'Kevin Schade|Brentford': 'RW',
+    'Hakon Valdimarsson|Brentford': 'GK',
+    'Sepp van den Berg|Brentford': 'CB',
+    'Callum Wilson|Brentford': 'ST',
+    'Yehor Yarmoliuk|Brentford': 'CM',
+    'Yasin Ayari|Brighton & Hove Albion': 'CM',
+    'Oluwafemi Azeez|Brighton & Hove Albion': 'GK',
+    'James Beadle|Brighton & Hove Albion': 'GK',
+    'Olivier Boscagli|Brighton & Hove Albion': 'CB',
+    'Promise David|Brighton & Hove Albion': 'ST',
+    'Maxim De Cuyper|Brighton & Hove Albion': 'LB',
+    'Lewis Dunk|Brighton & Hove Albion': 'CB',
+    'Evan Ferguson|Brighton & Hove Albion': 'ST',
+    'Diego Gomez|Brighton & Hove Albion': 'CM',
+    'Pascal Gross|Brighton & Hove Albion': 'CM',
+    'Jaouen Hadjam|Brighton & Hove Albion': 'LB',
+    'Ferdi Kadioglu|Brighton & Hove Albion': 'LB',
+    'Joao Pedro|Brighton & Hove Albion': 'ST',
+    'Thomas McGill|Brighton & Hove Albion': 'GK',
+    'Yankuba Minteh|Brighton & Hove Albion': 'RW',
+    'Kaoru Mitoma|Brighton & Hove Albion': 'LM',
+    "Matt O'Riley|Brighton & Hove Albion": 'CM',
+    'Ibrahim Osman|Brighton & Hove Albion': 'LW',
+    'Georginio Rutter|Brighton & Hove Albion': 'CAM',
+    'Jason Steele|Brighton & Hove Albion': 'GK',
+    'Pascal Struijk|Brighton & Hove Albion': 'CB',
+    'Michael Svoboda|Brighton & Hove Albion': 'CB',
+    'Bart Verbruggen|Brighton & Hove Albion': 'GK',
+    'Mats Wieffer|Brighton & Hove Albion': 'CDM',
+    'Luka Vuskovic|Brighton & Hove Albion': 'CB',
+    'Valentin Barco|Chelsea': 'LB',
+    'Jamie Gittens|Chelsea': 'LW',
+    'Moises Caicedo|Chelsea': 'CDM',
+    'Pep Chavarria|Chelsea': 'LB',
+    'Emmanuel Emegha|Chelsea': 'ST',
+    'Wesley Fofana|Chelsea': 'CB',
+    'Malo Gusto|Chelsea': 'RB',
+    'Jordan Henderson|Chelsea': 'CDM',
+    'Reece James|Chelsea': 'RB',
+    'Joao Pedro|Chelsea': 'ST',
+    'Maxence Lacroix|Chelsea': 'CB',
+    'Romeo Lavia|Chelsea': 'CDM',
+    'Pedro Neto|Chelsea': 'RW',
+    'Damin Emiliano Martinez|Chelsea': 'GK',
+    'Cole Palmer|Chelsea': 'CAM',
+    'Morgan Rogers|Chelsea': 'CAM',
+    'Levi Colwill|Chelsea': 'CB',
+    'Teddy Sharman-Lowe|Chelsea': 'GK',
+    'Gabriel Slonina|Chelsea': 'GK',
+    'Danny Welbeck|Chelsea': 'ST',
+    'Robert Sanchez|Chelsea': 'GK',
+    'Mykhailo Mudryk|Chelsea': 'LW',
+    'Jorrel Hato|Chelsea': 'CB',
+    'Geovany Quenda|Chelsea': 'RW',
+    'Marco Palestra|Chelsea': 'RB',
+    'Aurele Amenda|Coventry City': 'CB',
+    'Taiwo Awoniyi|Coventry City': 'ST',
+    'Daniel Bentley|Coventry City': 'GK',
+    'Jay Dasilva|Coventry City': 'LB',
+    'Josh Eccles|Coventry City': 'CM',
+    'Matt Grimes|Coventry City': 'CDM',
+    'Gustavo Hamer|Coventry City': 'LM',
+    'Kaine Kesler-Hayden|Coventry City': 'RB',
+    'Joel Latibeaudiere|Coventry City': 'CB',
+    'Ephron Mason-Clark|Coventry City': 'LM',
+    'Frank Onyeka|Coventry City': 'CDM',
+    'Victor Torp|Coventry City': 'CDM',
+    'Ethan Pinnock|Coventry City': 'CB',
+    'Jack Rudoni|Coventry City': 'CAM',
+    'Carl Rushworth|Coventry City': 'GK',
+    'Tatsuhiro Sakamoto|Coventry City': 'RM',
+    'Ellis Simms|Coventry City': 'ST',
+    'Loum Tchaouna|Coventry City': 'RM',
+    'Bobby Thomas|Coventry City': 'CB',
+    'Solomon Thomas-Asante|Coventry City': 'ST',
+    'Milan van Ewijk|Coventry City': 'RB',
+    'Ben Wilson|Coventry City': 'GK',
+    'Luke Woolfenden|Coventry City': 'CB',
+    'Haji Wright|Coventry City': 'ST',
+    'Caleb Yirenkyi|Coventry City': 'CM',
+    'Walter Benitez|Crystal Palace': 'GK',
+    'Ben Chilwell|Crystal Palace': 'LB',
+    'Axel Disasi|Crystal Palace': 'CB',
+    'Cheick Doucoure|Crystal Palace': 'CDM',
+    'Matheus Franca|Crystal Palace': 'CAM',
+    'Evann Guessand|Crystal Palace': 'RW',
+    'Dean Henderson|Crystal Palace': 'GK',
+    'Will Hughes|Crystal Palace': 'CM',
+    'Daichi Kamada|Crystal Palace': 'CAM',
+    'Anan Khalaili|Crystal Palace': 'RW',
+    'Jorgen Strand Larsen|Crystal Palace': 'ST',
+    'Jefferson Lerma|Crystal Palace': 'CDM',
+    'Jean-Philippe Mateta|Crystal Palace': 'ST',
+    'Remi Matthews|Crystal Palace': 'GK',
+    'Dwight McNeil|Crystal Palace': 'LM',
+    'Oscar Mingueza|Crystal Palace': 'RB',
+    'Tyrick Mitchell|Crystal Palace': 'LB',
+    'Eddie Nketiah|Crystal Palace': 'ST',
+    'Dario Osorio|Crystal Palace': 'RW',
+    'Yeremy Pino|Crystal Palace': 'RW',
+    'Christopher Richards|Crystal Palace': 'CB',
+    'Ismaila Sarr|Crystal Palace': 'RW',
+    'Quinten Timber|Crystal Palace': 'CM',
+    'Takehiro Tomiyasu|Crystal Palace': 'CB',
+    'Adam Wharton|Crystal Palace': 'CM',
+    'Carlos Alcaraz|Everton': 'CAM',
+    'Fraser Barnsley|Everton': 'GK',
+    'Thierno Barry|Everton': 'ST',
+    'Christian Norgaard|Everton': 'CDM',
+    'Jarrad Branthwaite|Everton': 'CB',
+    'Kiernan Dewsbury-Hall|Everton': 'CAM',
+    'James Garner|Everton': 'CDM',
+    'Jack Grealish|Everton': 'LM',
+    'Hayden Hackney|Everton': 'CM',
+    'Brennan Johnson|Everton': 'RW',
+    'Michael Keane|Everton': 'CB',
+    'Thomas King|Everton': 'GK',
+    'Ainsley Maitland-Niles|Everton': 'RB',
+    'Vitalii Mykolenko|Everton': 'LB',
+    'Jake OBrien|Everton': 'RB',
+    'Jordan Pickford|Everton': 'GK',
+    'Merlin Rohl|Everton': 'CM',
+    'James Tarkowski|Everton': 'CB',
+    'Mark Travers|Everton': 'GK',
+    'Iliman Ndiaye|Everton': 'LM',
+    'Beto|Everton': 'ST',
+    'Tim Iroegbunam|Everton': 'CDM',
+    'Idrissa Gueye|Everton': 'CDM',
+    'Jack Harrison|Everton': 'RM',
+    'David Affengruber|Fulham': 'CB',
+    'Michael Allen|Fulham': 'GK',
+    'Joachim Andersen|Fulham': 'CB',
+    'Calvin Bassey|Fulham': 'CB',
+    'Sander Berge|Fulham': 'CDM',
+    'Oscar Bobb|Fulham': 'RW',
+    'Tom Cairney|Fulham': 'CM',
+    'Timothy Castagne|Fulham': 'RB',
+    'Shea Charles|Fulham': 'CDM',
+    'Jorge Cuenca|Fulham': 'CB',
+    'Gonzalo Garcia|Fulham': 'ST',
+    'Alex Iwobi|Fulham': 'LM',
+    'Hugo Larsson|Fulham': 'CM',
+    'Benjamin Lecomte|Fulham': 'GK',
+    'Bernd Leno|Fulham': 'GK',
+    'Manuel Moran|Fulham': 'ST',
+    'Rodrigo Muniz|Fulham': 'ST',
+    'Cesar Palacios|Fulham': 'CAM',
+    'Harrison Reed|Fulham': 'CDM',
+    'Antonee Robinson|Fulham': 'LB',
+    'Kevin Macedo|Fulham': 'RW',
+    'Ryan Sessegnon|Fulham': 'LB',
+    'Emile Smith Rowe|Fulham': 'CAM',
+    'Kenny Tete|Fulham': 'RB',
+    'Terrell Works|Fulham': 'ST',
+    'Semilogo Ajayi|Hull City': 'CB',
+    'Ilyas Ansah|Hull City': 'ST',
+    'Mohamed Belloumi|Hull City': 'RW',
+    'Jack Butland|Hull City': 'GK',
+    'Mohamed-Ali Cho|Hull City': 'RW',
+    'Lewie Coyle|Hull City': 'RB',
+    'Matt Crooks|Hull City': 'CM',
+    'John Egan|Hull City': 'CB',
+    'Joe Gelhardt|Hull City': 'ST',
+    'Ryan Giles|Hull City': 'LM',
+    'Lucas Gourna-Douath|Hull City': 'CDM',
+    'Charles Hughes|Hull City': 'CB',
+    'Tim Iroegbunam|Hull City': 'CDM',
+    'Oliver McBurnie|Hull City': 'ST',
+    'Patrick McNair|Hull City': 'CB',
+    'Nobel Mendy|Hull City': 'CB',
+    'Hidemasa Morita|Hull City': 'CM',
+    'Brooke Norton-Cuffy|Hull City': 'RB',
+    'Abdulkadir Omur|Hull City': 'CAM',
+    'Dillon Phillips|Hull City': 'GK',
+    'Regan Slater|Hull City': 'CM',
+    'Elliot Stroud|Hull City': 'CM',
+    'Sorba Thomas|Hull City': 'RM',
+    'Konstantinos Tzolakis|Hull City': 'GK',
+    'Benjamin Tetteh|Hull City': 'ST',
+    'Chuba Akpom|Ipswich Town': 'ST',
+    'Jack Clarke|Ipswich Town': 'LM',
+    'Emersonn Correia|Ipswich Town': 'RB',
+    'Leif Davis|Ipswich Town': 'LB',
+    'Issa Diop|Ipswich Town': 'CB',
+    'Julio Enciso|Ipswich Town': 'CAM',
+    'Issahaku Fatawu|Ipswich Town': 'RM',
+    'Zian Flemming|Ipswich Town': 'CAM',
+    'Darnell Furlong|Ipswich Town': 'RB',
+    'Jacob Greaves|Ipswich Town': 'CB',
+    'Cedric Kipre|Ipswich Town': 'CB',
+    'Sasa Lukic|Ipswich Town': 'CDM',
+    'Daizen Maeda|Ipswich Town': 'LM',
+    'Azor Matusiwa|Ipswich Town': 'CDM',
+    'Kasey McAteer|Ipswich Town': 'RM',
+    'Anis Mehmeti|Ipswich Town': 'CAM',
+    'Florentino|Ipswich Town': 'CDM',
+    'Marcelino Nunez|Ipswich Town': 'CAM',
+    'Dara OShea|Ipswich Town': 'CB',
+    'Exequiel Palacios|Ipswich Town': 'CM',
+    'Alex Palmer|Ipswich Town': 'GK',
+    'Jaden Philogene|Ipswich Town': 'LM',
+    'Kjell Scherpen|Ipswich Town': 'GK',
+    'Jack Taylor|Ipswich Town': 'CDM',
+    'Christian Walton|Ipswich Town': 'GK',
+    'Brenden Aaronson|Leeds United': 'CAM',
+    'Ethan Ampadu|Leeds United': 'CDM',
+    'Melvin Bard|Leeds United': 'LB',
+    'Jaka Bijol|Leeds United': 'CB',
+    'Jayden Bogle|Leeds United': 'RB',
+    'Alex Cairns|Leeds United': 'GK',
+    'Dominic Calvert-Lewin|Leeds United': 'ST',
+    'Nico Elvedi|Leeds United': 'CB',
+    'Ilia Gruev|Leeds United': 'CDM',
+    'Gabriel Gudmundsson|Leeds United': 'LB',
+    'Daniel James|Leeds United': 'RW',
+    'Mateo Joseph|Leeds United': 'ST',
+    'James Justin|Leeds United': 'RB',
+    'Sean Longstaff|Leeds United': 'CM',
+    'Tarik Muharemovic|Leeds United': 'CB',
+    'Lukas Nmecha|Leeds United': 'ST',
+    'Noah Okafor|Leeds United': 'LW',
+    'Joe Rodon|Leeds United': 'CB',
+    'Anton Stach|Leeds United': 'CM',
+    'Ao Tanaka|Leeds United': 'CM',
+    'James Trafford|Leeds United': 'GK',
+    'Harry Wilson|Leeds United': 'RW',
+    'Michael Zetterer|Leeds United': 'GK',
+    'Frederic Woodman|Leeds United': 'GK',
+    'Isaac Bridge|Leeds United': 'LB',
+    'Ronald Araujo|Liverpool': 'CB',
+    'Bradley Barcola|Liverpool': 'LW',
+    'Alisson|Liverpool': 'GK',
+    'Conor Bradley|Liverpool': 'RB',
+    'Luke Chambers|Liverpool': 'LB',
+    'Federico Chiesa|Liverpool': 'RW',
+    'Hugo Ekitike|Liverpool': 'ST',
+    'Wataru Endo|Liverpool': 'CDM',
+    'Jeremie Frimpong|Liverpool': 'RB',
+    'Cody Gakpo|Liverpool': 'LW',
+    'Joe Gomez|Liverpool': 'CB',
+    'Ryan Gravenberch|Liverpool': 'CM',
+    'Alexander Isak|Liverpool': 'ST',
+    'Vitezslav Jaros|Liverpool': 'GK',
+    'Milos Kerkez|Liverpool': 'LB',
+    'Isaac Mabaya|Liverpool': 'RB',
+    'Alexis Mac Allister|Liverpool': 'CM',
+    'Giorgi Mamardashvili|Liverpool': 'GK',
+    'James McConnell|Liverpool': 'CM',
+    'Victor Munoz|Liverpool': 'RW',
+    'Dominik Szoboszlai|Liverpool': 'CAM',
+    'Kostas Tsimikas|Liverpool': 'LB',
+    'Virgil van Dijk|Liverpool': 'CB',
+    'Florian Wirtz|Liverpool': 'CAM',
+    'Frederick Woodman|Liverpool': 'GK',
+    'Rayan Ait-Nouri|Manchester City': 'LB',
+    'Elliot Anderson|Manchester City': 'CDM',
+    'Allan Andrade|Manchester City': 'CM',
+    'Marcus Bettinelli|Manchester City': 'GK',
+    'Rayan Cherki|Manchester City': 'RW',
+    'Jeremy Doku|Manchester City': 'LW',
+    'Gianluigi Donnarumma|Manchester City': 'GK',
+    'Ruben Dias|Manchester City': 'CB',
+    'Enzo Fernandez|Manchester City': 'CM',
+    'Phil Foden|Manchester City': 'CAM',
+    'Marc Guehi|Manchester City': 'CB',
+    'Josko Gvardiol|Manchester City': 'CB',
+    'Erling Haaland|Manchester City': 'ST',
+    'Abdukodir Khusanov|Manchester City': 'CB',
+    'Mateo Kovacic|Manchester City': 'CM',
+    'Rico Lewis|Manchester City': 'RB',
+    'Iliman Ndiaye|Manchester City': 'LM',
+    'Matheus Nunes|Manchester City': 'RB',
+    'Geronimo Rulli|Manchester City': 'GK',
+    'Antoine Semenyo|Manchester City': 'RW',
+    'Thiago Reis|Manchester City': 'CB',
+    'Oscar Bobb|Manchester City': 'RW',
+    'Savinho|Manchester City': 'RW',
+    'James McAtee|Manchester City': 'CAM',
+    'Jack Grealish|Manchester City': 'LM',
+    'Bruno Fernandes|Manchester United': 'CAM',
+    'Diogo Dalot|Manchester United': 'RB',
+    'Karl Darlow|Manchester United': 'GK',
+    'Matthijs de Ligt|Manchester United': 'CB',
+    'Amad Diallo|Manchester United': 'RW',
+    'Patrick Dorgu|Manchester United': 'LB',
+    'Tom Heaton|Manchester United': 'GK',
+    'Senne Lammens|Manchester United': 'GK',
+    'Harry Maguire|Manchester United': 'CB',
+    'Lisandro Martinez|Manchester United': 'CB',
+    'Noussair Mazraoui|Manchester United': 'RB',
+    'Bryan Mbeumo|Manchester United': 'RM',
+    'Dermot Mee|Manchester United': 'GK',
+    'Mason Mount|Manchester United': 'CAM',
+    'Andrey Santos|Manchester United': 'CM',
+    'Carlos Baleba|Manchester United': 'CDM',
+    'Marcus Rashford|Manchester United': 'LW',
+    'Matheus Cunha|Manchester United': 'CAM',
+    'Benjamin Sesko|Manchester United': 'ST',
+    'Luke Shaw|Manchester United': 'LB',
+    'Youri Tielemans|Manchester United': 'CM',
+    'Manuel Ugarte|Manchester United': 'CDM',
+    'Joshua Zirkzee|Manchester United': 'ST',
+    'Leny Yoro|Manchester United': 'CB',
+    'Kobbie Mainoo|Manchester United': 'CM',
+    'Joelinton|Newcastle United': 'CM',
+    'Harvey Barnes|Newcastle United': 'LW',
+    'Sven Botman|Newcastle United': 'CB',
+    'Dan Burn|Newcastle United': 'CB',
+    'Amar Dedic|Newcastle United': 'RB',
+    'Anthony Elanga|Newcastle United': 'RW',
+    'Mark Gillespie|Newcastle United': 'GK',
+    'Nicolas Gonzalez|Newcastle United': 'ST',
+    'Lewis Hall|Newcastle United': 'LB',
+    'Lukas Hornicek|Newcastle United': 'GK',
+    'Tino Livramento|Newcastle United': 'RB',
+    'Jacob Murphy|Newcastle United': 'RW',
+    'William Osula|Newcastle United': 'ST',
+    'Nick Pope|Newcastle United': 'GK',
+    'Jacob Ramsey|Newcastle United': 'CM',
+    'Fabian Schar|Newcastle United': 'CB',
+    'Malick Thiaw|Newcastle United': 'CB',
+    'Joseph Willock|Newcastle United': 'CM',
+    'Yoane Wissa|Newcastle United': 'ST',
+    'Sandro Tonali|Newcastle United': 'CDM',
+    'Bruno Guimaraes|Newcastle United': 'CM',
+    'Alexander Isak|Newcastle United': 'ST',
+    'Anthony Gordon|Newcastle United': 'LW',
+    'Kieran Trippier|Newcastle United': 'RB',
+    'Lewis Miley|Newcastle United': 'CM',
+    'Ola Aina|Nottingham Forest': 'RB',
+    'Steven Benda|Nottingham Forest': 'GK',
+    'Aaron Bott|Nottingham Forest': 'GK',
+    'Murillo|Nottingham Forest': 'CB',
+    'Liam Delap|Nottingham Forest': 'ST',
+    'Ousmane Diomande|Nottingham Forest': 'CB',
+    'Nicolas Dominguez|Nottingham Forest': 'CDM',
+    'Morgan Gibbs-White|Nottingham Forest': 'CAM',
+    'Callum Hudson-Odoi|Nottingham Forest': 'LM',
+    'Arnaud Kalimuendo|Nottingham Forest': 'ST',
+    'Igor Jesus|Nottingham Forest': 'ST',
+    'John Victor|Nottingham Forest': 'GK',
+    'James McAtee|Nottingham Forest': 'RM',
+    'Nikola Milenkovic|Nottingham Forest': 'CB',
+    'Daniel Munoz|Nottingham Forest': 'RB',
+    'Dan Ndoye|Nottingham Forest': 'LM',
+    'Luca Netz|Nottingham Forest': 'LB',
+    'Felipe|Nottingham Forest': 'CB',
+    'Ibrahim Sangare|Nottingham Forest': 'CDM',
+    'Nicolo Savona|Nottingham Forest': 'RB',
+    'Xaver Schlager|Nottingham Forest': 'CDM',
+    'Matz Sels|Nottingham Forest': 'GK',
+    'Neco Williams|Nottingham Forest': 'RB',
+    'Chris Wood|Nottingham Forest': 'ST',
+    'Ryan Yates|Nottingham Forest': 'CDM',
+    'Omar Alderete|Sunderland': 'CB',
+    'Ajibola Alese|Sunderland': 'CB',
+    'Abdoullah Ba|Sunderland': 'CM',
+    'Daniel Ballard|Sunderland': 'CB',
+    'Brian Brobbey|Sunderland': 'ST',
+    'Alan Browne|Sunderland': 'CM',
+    'Kevin Danso|Sunderland': 'CB',
+    'Mouhamadou Diarra|Sunderland': 'CM',
+    'Melker Ellborg|Sunderland': 'GK',
+    'Trai Hume|Sunderland': 'RB',
+    'Wilson Isidor|Sunderland': 'ST',
+    'Enzo Le Fee|Sunderland': 'CM',
+    'Reinildo Mandava|Sunderland': 'LB',
+    'Thomas Meunier|Sunderland': 'RB',
+    'Simon Moore|Sunderland': 'GK',
+    'Nordi Mukiele|Sunderland': 'RB',
+    'Romaine Mundle|Sunderland': 'LM',
+    'Luke ONein|Sunderland': 'CB',
+    'Nilson Angulo|Sunderland': 'LW',
+    'Robin Roefs|Sunderland': 'GK',
+    'Noah Sadiki|Sunderland': 'CM',
+    'Granit Xhaka|Sunderland': 'CDM',
+    'Simon Adingra|Sunderland': 'RW',
+    'Chemsdine Talbi|Sunderland': 'RW',
+    'Timur Tutierov|Sunderland': 'ST',
+    'Tosin Adarabioyo|Tottenham Hotspur': 'CB',
+    'Brandon Austin|Tottenham Hotspur': 'GK',
+    'Rodrigo Bentancur|Tottenham Hotspur': 'CDM',
+    'Ben Davies|Tottenham Hotspur': 'CB',
+    'Martin Dubravka|Tottenham Hotspur': 'GK',
+    'Mateus Fernandes|Tottenham Hotspur': 'CM',
+    'Conor Gallagher|Tottenham Hotspur': 'CM',
+    'Antonin Kinsky|Tottenham Hotspur': 'GK',
+    'Jacob Knightbridge|Tottenham Hotspur': 'GK',
+    'Mohammed Kudus|Tottenham Hotspur': 'RM',
+    'Dejan Kulusevski|Tottenham Hotspur': 'CM',
+    'James Maddison|Tottenham Hotspur': 'CM',
+    'Omar Marmoush|Tottenham Hotspur': 'LW',
+    'Savinho|Tottenham Hotspur': 'RW',
+    'Mykhailo Mudryk|Tottenham Hotspur': 'LW',
+    'Wilson Odobert|Tottenham Hotspur': 'LM',
+    'Pedro Porro|Tottenham Hotspur': 'RB',
+    'Andrew Robertson|Tottenham Hotspur': 'LB',
+    'Marcos Senesi|Tottenham Hotspur': 'CB',
+    'Xavi Simons|Tottenham Hotspur': 'CAM',
+    'Dominic Solanke|Tottenham Hotspur': 'ST',
+    'Sandro Tonali|Tottenham Hotspur': 'CDM',
+    'Destiny Udogie|Tottenham Hotspur': 'LB',
+    'Micky van de Ven|Tottenham Hotspur': 'CB',
+    'Jan-Paul van Hecke|Tottenham Hotspur': 'CB',
+    "Matt O'Riley|Brighton & Hove Albion": 'CM',
+    "Jake O'Brien|Everton": 'RB',
+    "Dara O'Shea|Ipswich Town": 'CB',
+    "Luke O'Nien|Sunderland": 'CB',
+
+};
+
+const positionAliases = {
+    "Kepa Arrizabalaga":"Kepa",
+    "Djordje Petrovic":"Đorđe Petrović",
+    "Bafode Diakite":"Bafodé Diakité",
+    "Caoimhin Kelleher":"Caoimhín Kelleher",
+    "Emiliano Buendia":"Emiliano Buendía"
+};
+
+function buildStats(name, club, pos, ovr, ratingExact = true) {
+    const canonicalName = positionAliases[name] || name;
+    const fcPos = fcPositionOverrides[`${canonicalName}|${club}`] || fcPositionOverrides[`${name}|${club}`] || pos;
+    const gamePos = mapGamePosition(fcPos);
+    let pac = ovr, sho = ovr, pas = ovr, dri = ovr, def = ovr, phy = ovr;
+
+    if (gamePos === "GK") { pac=ovr-5; sho=ovr-35; pas=ovr-3; dri=ovr-20; def=ovr-35; phy=ovr+2; }
+    if (gamePos === "DEF") { pac=ovr+2; sho=ovr-30; pas=ovr-3; dri=ovr-10; def=ovr+5; phy=ovr+2; }
+    if (gamePos === "MID") { pac=ovr-2; sho=ovr-8; pas=ovr+5; dri=ovr+2; def=ovr-12; phy=ovr-5; }
+    if (gamePos === "WING") { pac=ovr+5; sho=ovr-2; pas=ovr; dri=ovr+6; def=ovr-30; phy=ovr-8; }
+    if (gamePos === "ST") { pac=ovr+3; sho=ovr+5; pas=ovr-12; dri=ovr-2; def=ovr-35; phy=ovr+3; }
+
+    return {
+        name, club, pos: gamePos, fcPos, gamePos, ovr,
+        pac: Math.min(99, Math.max(1,pac)), sho: Math.min(99, Math.max(1,sho)),
+        pas: Math.min(99, Math.max(1,pas)), dri: Math.min(99, Math.max(1,dri)),
+        def: Math.min(99, Math.max(1,def)), phy: Math.min(99, Math.max(1,phy)), ratingExact
+    };
+}
+
+const players = rawPlayers.map(p =>
+    buildStats(p[0],p[1],p[2],p[3],p[4])
+);
+
+
+/* =====================================================
+   GAME STATE
+===================================================== */
+
+let selectedPlayers = [];
+
+let filledPositions = {
+    GK:null,
+    DEF:null,
+    MID:null,
+    WING:null,
+    ST:null
+};
+
+let currentClub = null;
+
+let currentRotation = 0;
+
+let skipAvailable = true;
+
+let spinning = false;
+
+
+/* =====================================================
+   DOM
+===================================================== */
+
+const startScreen =
+    document.getElementById("startScreen");
+
+const gameScreen =
+    document.getElementById("gameScreen");
+
+const finalScreen =
+    document.getElementById("finalScreen");
+
+const startButton =
+    document.getElementById("startButton");
+
+const spinButton =
+    document.getElementById("spinButton");
+
+const skipButton =
+    document.getElementById("skipButton");
+
+const skipStatus =
+    document.getElementById("skipStatus");
+
+const wheel =
+    document.getElementById("wheel");
+
+
+const clubResult =
+    document.getElementById("clubResult");
+
+const resultText =
+    document.getElementById("resultText");
+
+const playerList =
+    document.getElementById("playerList");
+
+const playerPanelTitle =
+    document.getElementById("playerPanelTitle");
+
+const progress =
+    document.getElementById("progress");
+
+const finalTeam =
+    document.getElementById("finalTeam");
+
+const overallScore =
+    document.getElementById("overallScore");
+
+const attackScore =
+    document.getElementById("attackScore");
+
+const defenseScore =
+    document.getElementById("defenseScore");
+
+const balanceScore =
+    document.getElementById("balanceScore");
+
+const revealButton =
+    document.getElementById("revealButton");
+
+const statsSection =
+    document.getElementById("statsSection");
+
+const statsBody =
+    document.getElementById("statsBody");
+
+const playAgainButton =
+    document.getElementById("playAgainButton");
+
+
+/* =====================================================
+   CLUB GRID
+===================================================== */
+
+const clubCells = [];
+
+clubs.forEach((club, index) => {
+
+    const cell = document.createElement("div");
+
+    cell.className = "club-cell";
+    cell.dataset.index = index;
+    cell.textContent = club.short;
+    cell.title = club.name;
+
+    wheel.appendChild(cell);
+    clubCells.push(cell);
+
+});
+
+function clearClubHighlights() {
+    clubCells.forEach(cell => {
+        cell.classList.remove("active", "final");
+    });
+}
+
+/* =====================================================
+   START
+===================================================== */
+
+startButton.addEventListener(
+    "click",
+    startGame
+);
+
+
+function startGame() {
+
+    startScreen.classList.remove("active");
+
+    gameScreen.classList.add("active");
+
+    resetGameState();
+
+    updateSkipUI();
+
+    updateTeamDisplay();
+
+}
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+function resetGameState() {
+
+    selectedPlayers = [];
+
+    filledPositions = {
+        GK:null,
+        DEF:null,
+        MID:null,
+        WING:null,
+        ST:null
+    };
+
+    currentClub = null;
+
+    currentRotation = 0;
+
+    skipAvailable = true;
+
+    spinning = false;
+
+    clearClubHighlights();
+
+    clubResult.textContent =
+        "READY?";
+
+    resultText.textContent =
+        "Spin to select a club.";
+
+    playerPanelTitle.textContent =
+        "SELECT A PLAYER";
+
+    playerList.innerHTML = `
+        <div style="color:#59647d;">
+            Spin the roulette first.
+        </div>
+    `;
+
+    spinButton.disabled = false;
+
+}
+
+
+/* =====================================================
+   SPIN
+===================================================== */
+
+spinButton.addEventListener(
+    "click",
+    spinRoulette
+);
+
+
+function spinRoulette() {
+
+    if (spinning) return;
+
+    if (selectedPlayers.length >= 5) return;
+
+    spinning = true;
+
+    spinButton.disabled = true;
+
+    currentClub = null;
+
+    skipButton.disabled = true;
+
+    clubResult.textContent =
+        "SPINNING...";
+
+    resultText.textContent =
+        "The roulette is selecting a club.";
+
+    playerPanelTitle.textContent =
+        "SELECT A PLAYER";
+
+    playerList.innerHTML = `
+        <div style="color:#59647d;">
+            Waiting for the roulette...
+        </div>
+    `;
+
+    clearClubHighlights();
+
+    const randomIndex =
+        Math.floor(Math.random() * clubs.length);
+
+    const selectedClub =
+        clubs[randomIndex];
+
+    // Flash through the 20 square cells and slow down near the result.
+    let currentIndex = Math.floor(Math.random() * clubs.length);
+    let steps = clubs.length * 3 + randomIndex;
+    let step = 0;
+    let delay = 55;
+
+    function advanceFlash() {
+
+        if (step >= steps) {
+
+            clearClubHighlights();
+
+            const finalCell = clubCells[randomIndex];
+            finalCell.classList.add("final");
+
+            currentClub = selectedClub;
+            spinning = false;
+
+            clubResult.textContent =
+                selectedClub.short;
+
+            resultText.textContent =
+                selectedClub.name;
+
+            showPlayers(selectedClub);
+            updateSkipUI();
+            spinButton.disabled = true;
+
+            return;
+        }
+
+        clearClubHighlights();
+
+        currentIndex = (currentIndex + 1) % clubs.length;
+        clubCells[currentIndex].classList.add("active");
+
+        step++;
+
+        if (step > steps - 8) {
+            delay += 35;
+        } else if (step > steps - 18) {
+            delay += 12;
+        }
+
+        setTimeout(advanceFlash, delay);
+    }
+
+    advanceFlash();
+
+}
+
+
+/* =====================================================
+   SHOW PLAYERS
+===================================================== */
+
+function showPlayers(club) {
+    playerList.innerHTML = "";
+
+    const eligiblePlayers = players.filter(player =>
+        player.club === club.name && filledPositions[player.gamePos] === null
+    );
+
+    if (eligiblePlayers.length === 0) {
+        playerPanelTitle.textContent = "NO ELIGIBLE PLAYERS";
+        resultText.textContent = "No available position.";
+        playerList.innerHTML = `<div style="color:#59647d;line-height:1.6;">No available player from this club.<br><br>Spin again.</div>`;
+        currentClub = null;
+        spinButton.disabled = false;
+        updateSkipUI();
+        return;
+    }
+
+    playerPanelTitle.textContent = `SELECT A PLAYER — ${club.short}`;
+
+    const groups = [
+        ["GK", "GOALKEEPER"], ["DEF", "DEFENDERS"], ["MID", "MIDFIELDERS"],
+        ["WING", "WINGERS"], ["ST", "STRIKERS"]
+    ];
+
+    groups.forEach(([groupKey, label], index) => {
+        const groupPlayers = eligiblePlayers
+            .filter(player => player.gamePos === groupKey)
+            .sort((a,b) => b.ovr - a.ovr);
+        if (!groupPlayers.length) return;
+
+        const details = document.createElement("details");
+        details.className = "position-group";
+        if (index === 0) details.open = true;
+        details.innerHTML = `<summary><span>${label}</span><span class="position-group-count">${groupPlayers.length} PLAYERS</span></summary>`;
+
+        groupPlayers.forEach(player => {
+            const card = document.createElement("button");
+            card.className = "player-card";
+            card.type = "button";
+            card.innerHTML = `
+                <span class="ovr">${player.ovr}</span>
+                <div class="player-name">${player.name}</div>
+                <div class="player-info"><span class="fc-pos">FC 27: ${player.fcPos}</span> <span class="game-pos">→ ${player.gamePos}</span> · ${club.name}</div>
+            `;
+            card.addEventListener("click", () => selectPlayer(player));
+            details.appendChild(card);
+        });
+        playerList.appendChild(details);
+    });
+}
+
+/* =====================================================
+   SELECT PLAYER
+===================================================== */
+
+function selectPlayer(player) {
+
+    if (filledPositions[player.gamePos] !== null) {
+
+        alert(
+            "This position has already been filled."
+        );
+
+        return;
+    }
+
+
+    const selectedPlayer = {
+        ...player
+    };
+
+
+    selectedPlayers.push(
+        selectedPlayer
+    );
+
+    filledPositions[player.gamePos] =
+        selectedPlayer;
+
+
+    /*
+        Current club is now completed.
+
+        Skip cannot be used after selecting
+        a player from this club.
+    */
+
+    currentClub = null;
+
+    updateSkipUI();
+
+
+    clubResult.textContent =
+        selectedPlayer.name;
+
+    resultText.textContent =
+        `${selectedPlayer.fcPos} (${selectedPlayer.gamePos}) selected.`;
+
+
+    playerList.innerHTML = `
+        <div style="color:#59647d;line-height:1.6;">
+            Player selected!<br><br>
+            Spin again for your next position.
+        </div>
+    `;
+
+
+    playerPanelTitle.textContent =
+        "PLAYER SELECTED";
+
+
+    updateTeamDisplay();
+
+
+    if (selectedPlayers.length >= 5) {
+
+        spinButton.disabled = true;
+
+        skipButton.disabled = true;
+
+        setTimeout(
+            showFinalScreen,
+            700
+        );
+
+        return;
+    }
+
+
+    spinButton.disabled = false;
+
+}
+
+
+/* =====================================================
+   SKIP
+===================================================== */
+
+skipButton.addEventListener(
+    "click",
+    skipCurrentClub
+);
+
+
+function skipCurrentClub() {
+
+    /*
+        Skip is valid only when:
+
+        1. Skip has not been used.
+        2. Roulette is not spinning.
+        3. A club is currently waiting for
+           a player selection.
+    */
+
+    if (!skipAvailable) return;
+
+    if (spinning) return;
+
+    if (!currentClub) return;
+
+
+    const skippedClub =
+        currentClub;
+
+
+    /*
+        Permanently consume Skip.
+    */
+
+    skipAvailable = false;
+
+    currentClub = null;
+
+
+    clubResult.textContent =
+        "SKIPPED";
+
+    resultText.textContent =
+        `${skippedClub.name} was skipped.`;
+
+
+    playerPanelTitle.textContent =
+        "CLUB SKIPPED";
+
+
+    playerList.innerHTML = `
+        <div style="color:#59647d;line-height:1.6;">
+
+            <strong>
+                ${skippedClub.name}
+            </strong>
+            was skipped.
+
+            <br><br>
+
+            Your Skip has been used.
+
+            <br>
+
+            Spin again to continue.
+
+        </div>
+    `;
+
+
+    /*
+        IMPORTANT:
+
+        This is permanent.
+
+        updateSkipUI() will keep the button
+        disabled for the rest of the game.
+    */
+
+    updateSkipUI();
+
+
+    /*
+        User MUST spin again.
+    */
+
+    spinButton.disabled = false;
+
+}
+
+
+/* =====================================================
+   SKIP UI
+===================================================== */
+
+function updateSkipUI() {
+
+    if (!skipAvailable) {
+
+        skipButton.disabled = true;
+
+        skipButton.textContent =
+            "SKIP USED";
+
+        skipStatus.textContent =
+            "Skip available: 0";
+
+        return;
+    }
+
+
+    if (!currentClub || spinning) {
+
+        skipButton.disabled = true;
+
+        skipButton.textContent =
+            "SKIP CLUB";
+
+        skipStatus.textContent =
+            "Skip available: 1";
+
+        return;
+    }
+
+
+    skipButton.disabled = false;
+
+    skipButton.textContent =
+        "SKIP CLUB";
+
+    skipStatus.textContent =
+        "Skip available: 1";
+
+}
+
+
+/* =====================================================
+   TEAM DISPLAY
+===================================================== */
+
+function updateTeamDisplay() {
+
+    const cards =
+        document.querySelectorAll(
+            ".position-card"
+        );
+
+
+    cards.forEach(card => {
+
+        const position =
+            card.dataset.position;
+
+        const player =
+            filledPositions[position];
+
+        const nameElement =
+            card.querySelector(
+                ".position-player"
+            );
+
+
+        if (player) {
+
+            nameElement.textContent =
+                player.name;
+
+            card.classList.add("filled");
+
+        } else {
+
+            nameElement.textContent =
+                "Empty";
+
+            card.classList.remove("filled");
+
+        }
+
+    });
+
+
+    progress.textContent =
+        `${selectedPlayers.length} / 5 PLAYERS`;
+
+}
+
+
+/* =====================================================
+   FINAL SCREEN
+===================================================== */
+
+function showFinalScreen() {
+
+    gameScreen.classList.remove("active");
+
+    finalScreen.classList.add("active");
+
+    finalTeam.innerHTML = "";
+
+
+    selectedPlayers.forEach(player => {
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "final-player";
+
+        card.innerHTML = `
+            <div class="final-position">
+                ${player.fcPos} · ${player.gamePos}
+            </div>
+
+            <div class="final-name">
+                ${player.name}
+            </div>
+
+            <div class="final-club">
+                ${player.club}
+            </div>
+
+            <div style="
+                margin-top:8px;
+                font-weight:bold;
+                color:#1f6fff;
+            ">
+                OVR ${player.ovr}
+            </div>
+            <div style="margin-top:4px;font-size:10px;color:#8992a5;">
+                ${player.ratingExact ? "FC 27 OFFICIAL" : "FC 27 REFERENCE"}
+            </div>
+        `;
+
+        finalTeam.appendChild(card);
+
+    });
+
+
+    calculateScores();
+
+}
+
+
+/* =====================================================
+   SCORE
+===================================================== */
+
+function calculateScores() {
+
+    const averageOverall =
+        selectedPlayers.reduce(
+            (sum,p) => sum + p.ovr,
+            0
+        ) / selectedPlayers.length;
+
+
+    const attack =
+        selectedPlayers.reduce(
+            (sum,p) => {
+
+                return sum +
+                    (
+                        p.sho +
+                        p.dri +
+                        p.pac
+                    ) / 3;
+
+            },
+            0
+        ) / selectedPlayers.length;
+
+
+    const defense =
+        selectedPlayers.reduce(
+            (sum,p) => {
+
+                return sum +
+                    (
+                        p.def +
+                        p.phy
+                    ) / 2;
+
+            },
+            0
+        ) / selectedPlayers.length;
+
+
+    const balance =
+        100 -
+        Math.abs(
+            attack - defense
+        );
+
+
+    overallScore.textContent =
+        Math.round(averageOverall);
+
+    attackScore.textContent =
+        Math.round(attack);
+
+    defenseScore.textContent =
+        Math.round(defense);
+
+    balanceScore.textContent =
+        Math.round(balance);
+
+}
+
+
+/* =====================================================
+   REVEAL
+===================================================== */
+
+revealButton.addEventListener(
+    "click",
+    revealStats
+);
+
+
+function revealStats() {
+
+    statsSection.classList.add(
+        "visible"
+    );
+
+    revealButton.style.display =
+        "none";
+
+    statsBody.innerHTML = "";
+
+
+    selectedPlayers.forEach(player => {
+
+        const row =
+            document.createElement("tr");
+
+        row.innerHTML = `
+            <td>
+                <strong>
+                    ${player.name}
+                </strong>
+            </td>
+
+            <td>${player.pac}</td>
+            <td>${player.sho}</td>
+            <td>${player.pas}</td>
+            <td>${player.dri}</td>
+            <td>${player.def}</td>
+            <td>${player.phy}</td>
+        `;
+
+        statsBody.appendChild(row);
+
+    });
+
+}
+
+
+/* =====================================================
+   PLAY AGAIN
+===================================================== */
+
+playAgainButton.addEventListener(
+    "click",
+    playAgain
+);
+
+
+function playAgain() {
+
+    finalScreen.classList.remove(
+        "active"
+    );
+
+    gameScreen.classList.add(
+        "active"
+    );
+
+    statsSection.classList.remove(
+        "visible"
+    );
+
+    revealButton.style.display =
+        "block";
+
+    resetGameState();
+
+    updateSkipUI();
+
+    updateTeamDisplay();
+
+}
+
+</script>
+
+</body>
+</html>
